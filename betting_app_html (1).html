@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizator Pariuri Sportive Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { color: #bbf7d0; font-size: 1.1em; }
+        .bankroll-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .bankroll-item h3 { font-size: 0.9em; color: #bbf7d0; margin-bottom: 5px; }
+        .bankroll-item .value { font-size: 1.8em; font-weight: bold; }
+        .risk-levels {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .risk-level {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.2);
+        }
+        .risk-level.active { background: #fbbf24; }
+        .warning {
+            background: rgba(245, 158, 11, 0.2);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        .warning-icon { font-size: 1.5em; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            background: #334155;
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab:hover { background: #475569; }
+        .tab.active { background: #16a34a; box-shadow: 0 10px 30px rgba(22, 163, 74, 0.3); }
+        .content-box {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .section-title { font-size: 1.5em; margin-bottom: 20px; font-weight: bold; }
+        .match-card {
+            background: #334155;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .match-header { margin-bottom: 15px; }
+        .match-league { color: #94a3b8; font-size: 0.9em; margin-bottom: 5px; }
+        .match-teams { font-size: 1.2em; font-weight: bold; }
+        .odds-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .odd-box {
+            background: #475569;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .odd-label { font-size: 0.9em; color: #cbd5e1; margin-bottom: 5px; }
+        .odd-value { font-size: 1.8em; font-weight: bold; color: #4ade80; }
+        .value-badge { font-size: 0.8em; color: #fbbf24; margin-top: 5px; }
+        .form-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .form-badge {
+            background: rgba(59, 130, 246, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .calc-box {
+            background: #334155;
+            border-radius: 12px;
+            padding: 25px;
+        }
+        .calc-title { font-size: 1.2em; font-weight: bold; margin-bottom: 20px; }
+        .input-group { margin-bottom: 20px; }
+        .input-label {
+            display: block;
+            font-size: 0.9em;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+        .input-field {
+            width: 100%;
+            background: #475569;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: white;
+            font-size: 1em;
+        }
+        .calc-button {
+            width: 100%;
+            background: #16a34a;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .calc-button:hover { background: #15803d; }
+        .result-text {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .result-success { color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+        .result-error { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        .empty-icon { font-size: 4em; margin-bottom: 20px; }
+        .refresh-btn {
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .refresh-btn:hover { background: #2563eb; }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.5em; }
+            .odds-grid { grid-template-columns: 1fr; }
+            .calculator-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ Analizator Pariuri Sportive Pro</h1>
+            <p>Analiză inteligentă pentru decizii informate</p>
+            <div class="bankroll-box">
+                <div class="bankroll-item">
+                    <h3>Bankroll Total</h3>
+                    <div class="value"><span id="bankroll-display">1000.00</span> RON</div>
+                </div>
+                <div class="bankroll-item">
+                    <h3>Nivel Risc</h3>
+                    <div class="risk-levels" id="risk-levels">
+                        <div class="risk-level" data-level="1"></div>
+                        <div class="risk-level active" data-level="2"></div>
+                        <div class="risk-level" data-level="3"></div>
+                        <div class="risk-level" data-level="4"></div>
+                        <div class="risk-level" data-level="5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <div class="warning-icon">⚠️</div>
+            <div>
+                <div style="font-weight: bold; color: #f59e0b; margin-bottom: 5px;">Avertisment Important</div>
+                <div style="color: #fcd34d;">Această aplicație oferă analiză și sugestii, NU garantează câștiguri. Pariază doar cu bani pe care îți permiți să-i pierzi. Jocul responsabil este esențial.</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('analiza')">📊 Analiză Meciuri</button>
+            <button class="tab" onclick="switchTab('calculator')">🧮 Calculator</button>
+            <button class="tab" onclick="switchTab('istoric')">📜 Istoric</button>
+        </div>
+
+        <div id="tab-analiza" class="content-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h2 class="section-title" style="margin: 0;">Meciuri de Analizat</h2>
+                <button class="refresh-btn" onclick="loadMatches()">🔄 Actualizează</button>
+            </div>
+            <div id="matches-container"></div>
+        </div>
+
+        <div id="tab-calculator" class="content-box" style="display: none;">
+            <h2 class="section-title">Calculator Pariuri</h2>
+            <div class="calculator-grid">
+                <div class="calc-box">
+                    <div class="calc-title">📐 Kelly Criterion</div>
+                    <div class="input-group">
+                        <label class="input-label">Cotă</label>
+                        <input type="number" class="input-field" id="kelly-cota" value="2.00" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Probabilitate Estimată (%)</label>
+                        <input type="number" class="input-field" id="kelly-prob" value="55">
+                    </div>
+                    <button class="calc-button" onclick="calculateKelly()">Calculează</button>
+                    <div id="kelly-result" class="result-text"></div>
+                </div>
+
+                <div class="calc-box">
+                    <div class="calc-title">💰 Value Bet Calculator</div>
+                    <div class="input-group">
+                        <label class="input-label">Cotă Oferită</label>
+                        <input type="number" class="input-field" id="value-cota" value="3.00" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Probabilitate Reală (%)</label>
+                        <input type="number" class="input-field" id="value-prob" value="40">
+                    </div>
+                    <button class="calc-button" onclick="calculateValue()">Verifică Value</button>
+                    <div id="value-result" class="result-text"></div>
+                </div>
+            </div>
+
+            <div class="calc-box">
+                <div class="calc-title">⚙️ Setări Bankroll</div>
+                <div class="input-group">
+                    <label class="input-label">Bankroll Total (RON)</label>
+                    <input type="number" class="input-field" id="bankroll-input" value="1000" onchange="updateBankroll()">
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-istoric" class="content-box" style="display: none;">
+            <h2 class="section-title">Istoric Pariuri</h2>
+            <div class="empty-state">
+                <div class="empty-icon">📜</div>
+                <p style="font-size: 1.1em; margin-bottom: 10px;">Nu ai pariuri în istoric încă.</p>
+                <p>Pariurile tale vor apărea aici.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bankroll = 1000;
+        let riskLevel = 2;
+
+        const matches = [
+            {
+                id: 1, liga: "Premier League", echipa1: "Manchester City", echipa2: "Arsenal",
+                cota1: 2.10, cotaX: 3.40, cota2: 3.50, forma1: "WWWDW", forma2: "WDWWL", data: "Azi, 20:00"
+            },
+            {
+                id: 2, liga: "La Liga", echipa1: "Real Madrid", echipa2: "Barcelona",
+                cota1: 2.30, cotaX: 3.20, cota2: 3.10, forma1: "WWWWL", forma2: "DWWWW", data: "Azi, 22:00"
+            },
+            {
+                id: 3, liga: "Serie A", echipa1: "Inter", echipa2: "Juventus",
+                cota1: 2.00, cotaX: 3.30, cota2: 3.80, forma1: "WWDWW", forma2: "WDLDW", data: "Mâine, 19:45"
+            }
+        ];
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[id^="tab-"]').forEach(c => c.style.display = 'none');
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).style.display = 'block';
+        }
+
+        function updateBankroll() {
+            bankroll = parseFloat(document.getElementById('bankroll-input').value) || 1000;
+            document.getElementById('bankroll-display').textContent = bankroll.toFixed(2);
+        }
+
+        function calculateKelly() {
+            const cota = parseFloat(document.getElementById('kelly-cota').value);
+            const prob = parseFloat(document.getElementById('kelly-prob').value);
+            
+            const p = prob / 100;
+            const q = 1 - p;
+            const b = cota - 1;
+            const kelly = Math.max(0, ((b * p - q) / b) * 0.25 * 100);
+            const suma = (bankroll * kelly / 100).toFixed(2);
+            
+            const resultEl = document.getElementById('kelly-result');
+            resultEl.className = 'result-text result-success';
+            resultEl.textContent = `Sumă recomandată: ${suma} RON (${kelly.toFixed(2)}% din bankroll)`;
+        }
+
+        function calculateValue() {
+            const cota = parseFloat(document.getElementById('value-cota').value);
+            const prob = parseFloat(document.getElementById('value-prob').value);
+            const value = ((prob * cota) / 100) - 1;
+            
+            const resultEl = document.getElementById('value-result');
+            if (value > 0) {
+                resultEl.className = 'result-text result-success';
+                resultEl.textContent = `✓ VALUE BET! Edge: +${(value * 100).toFixed(2)}%`;
+            } else {
+                resultEl.className = 'result-text result-error';
+                resultEl.textContent = `✗ Nu este value bet. Edge: ${(value * 100).toFixed(2)}%`;
+            }
+        }
+
+        function loadMatches() {
+            const container = document.getElementById('matches-container');
+            container.innerHTML = '';
+            
+            matches.forEach(meci => {
+                const value1 = ((48 * meci.cota1) / 100) - 1;
+                const value2 = ((30 * meci.cota2) / 100) - 1;
+                
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.innerHTML = `
+                    <div class="match-header">
+                        <div class="match-league">${meci.liga} • ${meci.data}</div>
+                        <div class="match-teams">${meci.echipa1} vs ${meci.echipa2}</div>
+                    </div>
+                    <div class="odds-grid">
+                        <div class="odd-box">
+                            <div class="odd-label">${meci.echipa1}</div>
+                            <div class="odd-value">${meci.cota1}</div>
+                            ${value1 > 0 ? `<div class="value-badge">Value: +${(value1 * 100).toFixed(1)}%</div>` : ''}
+                        </div>
+                        <div class="odd-box">
+                            <div class="odd-label">Egal</div>
+                            <div class="odd-value">${meci.cotaX}</div>
+                        </div>
+                        <div class="odd-box">
+                            <div class="odd-label">${meci.echipa2}</div>
+                            <div class="odd-value">${meci.cota2}</div>
+                            ${value2 > 0 ? `<div class="value-badge">Value: +${(value2 * 100).toFixed(1)}%</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="form-badges">
+                        <div class="form-badge">${meci.echipa1}: ${meci.forma1}</div>
+                        <div class="form-badge">${meci.echipa2}: ${meci.forma2}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Risk level selector
+        document.getElementById('risk-levels').addEventListener('click', (e) => {
+            if (e.target.classList.contains('risk-level')) {
+                const level = parseInt(e.target.dataset.level);
+                riskLevel = level;
+                document.querySelectorAll('.risk-level').forEach((el, idx) => {
+                    el.classList.toggle('active', idx < level);
+                });
+            }
+        });
+
+        // Load matches on page load
+        loadMatches();
+    </script>
+</body>
+</html>
